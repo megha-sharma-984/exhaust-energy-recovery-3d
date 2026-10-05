@@ -2,8 +2,11 @@
 
 An interactive, high-fidelity 3D mechanical engineering visualization and simulation web application based **EXACTLY** on a hand-drawn reference sketch for a heavy-vehicle exhaust energy recovery system.
 
-🌐 **Live Online Demo**: [https://driven-ansh.github.io/exhaust-energy-recovery-3d/](https://driven-ansh.github.io/exhaust-energy-recovery-3d/)  
-📦 **GitHub Repository**: [https://github.com/Driven-Ansh/exhaust-energy-recovery-3d](https://github.com/Driven-Ansh/exhaust-energy-recovery-3d)
+🌐 **Live Demo:**  
+https://megha-sharma-984.github.io/exhaust-energy-recovery-3d/
+
+📦 **GitHub Repository:**  
+https://github.com/megha-sharma-984/exhaust-energy-recovery-3d
 
 ---
 
@@ -52,7 +55,7 @@ Reconstructs the original hand-drawn concept sketch as a clean, photorealistic W
 ## 🚀 Local Setup
 
 ```bash
-git clone https://github.com/Driven-Ansh/exhaust-energy-recovery-3d.git
+git clone https://github.com/megha-sharma-984/exhaust-energy-recovery-3d.git
 cd exhaust-energy-recovery-3d
 npm install
 npm run dev
