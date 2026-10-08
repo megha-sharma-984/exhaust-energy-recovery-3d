@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SYSTEM_DIMENSIONS } from "../../data/dimensions";
 import { useAppStore } from "../../store/useAppStore";
-const SMALLEST_SCALE = 0.5; // size of wheel T1 (50%)
+const SMALLEST_SCALE = 0.35; // size of wheel T1 (50%)
 const LARGEST_SCALE = 1.0;  // size of wheel T12 (100%)
 
 export function TurbineModel() {
