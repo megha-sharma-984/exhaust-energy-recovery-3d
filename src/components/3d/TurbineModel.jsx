@@ -3,6 +3,8 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SYSTEM_DIMENSIONS } from "../../data/dimensions";
 import { useAppStore } from "../../store/useAppStore";
+const SMALLEST_SCALE = 0.5; // size of wheel T1 (50%)
+const LARGEST_SCALE = 1.0;  // size of wheel T12 (100%)
 
 export function TurbineModel() {
   const rotorRef = useRef();
@@ -41,12 +43,14 @@ export function TurbineModel() {
     const tKey = `turbine_t${stageNum}`;
     const xPos = startX - index * seriesSpacing;
     const stagePitch = (index * Math.PI) / 8; // Multi-stage progressive pitch down series
+    const scale = SMALLEST_SCALE + ((LARGEST_SCALE - SMALLEST_SCALE) * index) / (bladeCount - 1);
 
     return {
       id: tKey,
       stageNum,
       xPos,
       stagePitch,
+      scale,
     };
   });
 
@@ -95,6 +99,7 @@ export function TurbineModel() {
             <group
               key={tWheel.id}
               position={[tWheel.xPos, 0, 0]}
+              scale={tWheel.scale}
               onClick={(e) => {
                 e.stopPropagation();
                 setSelected(tWheel.id);
@@ -154,7 +159,7 @@ export function TurbineModel() {
 
         {/* Front Bullet Nose Cone */}
         <mesh position={[startX + 0.35, 0, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
-          <coneGeometry args={[hubRadius * 0.95, 0.6, 32]} />
+          <coneGeometry args={[hubRadius * 0.95 * SMALLEST_SCALE, 0.6, 32]} />
           <meshStandardMaterial color="#fbbf24" metalness={0.95} roughness={0.08} />
         </mesh>
       </group>

@@ -84,7 +84,7 @@ export const COMPONENTS_DATA = {
     sketchLabel: "12-Blade / Stage Turbine Architecture",
     description: "Multi-stage axial turbine array comprising 12 SEPARATE TURBINE WHEELS (T1 through T12) mounted sequentially in series on the common central shaft.",
     coreFunction: "Sequentially extracts kinetic energy from gas stream across 12 distinct rotor stages, driving common shaft rotation.",
-    specs: { "Stage Count": "12 Separate Turbines in Series", "Rotor Outer Diameter": "320 mm", "Total Isentropic Efficiency": "78.4%", "Max Rated Speed": "22,500 RPM" },
+    specs: { "Stage Count": "12 Separate Turbines in Series", "Rotor Outer Diameter": "160 mm (T1) → 320 mm (T12)", "Total Isentropic Efficiency": "78.4%", "Max Rated Speed": "22,500 RPM" },
   },
 
   ...Array.from({ length: 12 }).reduce((acc, _, idx) => {
