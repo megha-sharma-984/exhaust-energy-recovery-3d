@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { SYSTEM_DIMENSIONS } from "../../data/dimensions";
 import { useAppStore } from "../../store/useAppStore";
+const ENGINE_SCALE = 2.0; // 1.0 = original size, 1.2 = 20% bigger
 
 export function EngineModel() {
   const meshRef = useRef();
@@ -27,11 +28,23 @@ export function EngineModel() {
   const isEngineHovered = hoveredId === "engine";
 
   const { position, width, height, depth } = SYSTEM_DIMENSIONS.engine;
-  const currentX = position[0] + (viewMode === "exploded" ? 4.0 : 0);
-
-  // 3-Cylinder Piston Positions along X axis inside Engine Block
-  const cylinderOffsets = [-0.95, 0.0, 0.95];
-  const phaseOffsets = [0, 2.09439, 4.18879]; // 120-degree firing order
+  // Scaling grows the engine in every direction. Shift it right by the extra half-width
+  // so its pipe-side face stays where it was and the pipe stays connected.
+  const currentX = position[0] + (width / 2) * (ENGINE_SCALE - 1) + (viewMode === "exploded" ? 4.0 : 0);
+    // 6 cylinders in two rows of 3: C1-C3 back row, C4-C6 front row
+  const FIRING_ORDER = [1, 5, 3, 6, 2, 4];
+  const cylinderLayout = [
+    { x: -0.95, z: -0.75 }, // C1
+    { x: 0.0, z: -0.75 },   // C2
+    { x: 0.95, z: -0.75 },  // C3
+    { x: -0.95, z: 0.75 },  // C4
+    { x: 0.0, z: 0.75 },    // C5
+    { x: 0.95, z: 0.75 },   // C6
+  ];
+  // each cylinder's phase = its place in the firing order, spread evenly
+  const phaseOffsets = cylinderLayout.map(
+    (_, i) => (FIRING_ORDER.indexOf(i + 1) * 2 * Math.PI) / 6
+  );
 
   // Engine speed scales dynamically with engineLoad slider (0-100%)
   const speedFactor = (engineLoad / 75) * simulationSpeed;
@@ -39,7 +52,7 @@ export function EngineModel() {
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime * (isSimulating && !isPaused ? 9.0 : 3.5) * speedFactor;
 
-    cylinderOffsets.forEach((_, i) => {
+    cylinderLayout.forEach((_, i) => {
       const cycle = Math.sin(time + phaseOffsets[i]);
       const pistonY = cycle * 0.45;
 
@@ -66,8 +79,7 @@ export function EngineModel() {
   });
 
   return (
-    <group position={[currentX, position[1], position[2]]}>
-      {/* Engine Block Enclosure (Transparent in Cutaway mode) */}
+    <group position={[currentX, position[1], position[2]]} scale={ENGINE_SCALE}>      {/* Engine Block Enclosure (Transparent in Cutaway mode) */}
       <mesh
         ref={meshRef}
         castShadow
@@ -105,8 +117,8 @@ export function EngineModel() {
         <meshStandardMaterial color="#cbd5e1" metalness={0.92} roughness={0.12} />
       </mesh>
 
-      {/* 3 INDIVIDUAL CYLINDER BORE ASSEMBLIES (C1, C2, C3) */}
-      {cylinderOffsets.map((xPos, i) => {
+      {/* 6 INDIVIDUAL CYLINDER BORE ASSEMBLIES (C1 to C6) */}
+      {cylinderLayout.map((pos, i) => {
         const cylId = `cylinder_${i + 1}`;
         const isCylSelected = selectedId === cylId;
         const isCylHovered = hoveredId === cylId;
@@ -114,7 +126,7 @@ export function EngineModel() {
         return (
           <group
             key={i}
-            position={[xPos, 0, 0]}
+            position={[pos.x, 0, pos.z]}
             onClick={(e) => {
               e.stopPropagation();
               setSelected(cylId);
@@ -207,19 +219,24 @@ export function EngineModel() {
         );
       })}
 
-      {/* Crankshaft Center Journal Axis */}
-      <mesh position={[0, -0.65, 0]} rotation={[0, 0, Math.PI / 2]}>
-        <cylinderGeometry args={[0.12, 0.12, width * 0.85, 24]} />
-        <meshStandardMaterial color="#1e293b" metalness={0.95} roughness={0.1} />
-      </mesh>
-
-      {/* Exhaust Header Pipe Outlets */}
-      {cylinderOffsets.map((xPos, i) => (
-        <mesh key={i} position={[xPos, 0.4, -depth / 2 - 0.25]} rotation={[Math.PI / 2, 0, 0]}>
-          <cylinderGeometry args={[0.18, 0.2, 0.5, 16]} />
-          <meshStandardMaterial color="#cbd5e1" metalness={0.92} roughness={0.18} />
+      {/* Crankshaft Journal Axis, one under each row */}
+      {[-0.75, 0.75].map((z) => (
+        <mesh key={z} position={[0, -0.65, z]} rotation={[0, 0, Math.PI / 2]}>
+          <cylinderGeometry args={[0.12, 0.12, width * 0.85, 24]} />
+          <meshStandardMaterial color="#1e293b" metalness={0.95} roughness={0.1} />
         </mesh>
       ))}
+
+      {/* Exhaust Header Pipe Outlets */}
+      {cylinderLayout.map((pos, i) => {
+        const side = pos.z < 0 ? -1 : 1; // back row exits at the back, front row at the front
+        return (
+          <mesh key={i} position={[pos.x, 0.4, side * (depth / 2 + 0.25)]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.18, 0.2, 0.5, 16]} />
+            <meshStandardMaterial color="#cbd5e1" metalness={0.92} roughness={0.18} />
+          </mesh>
+        );
+      })}
 
       {/* Selection outline */}
       {(isEngineSelected || isEngineHovered) && (
